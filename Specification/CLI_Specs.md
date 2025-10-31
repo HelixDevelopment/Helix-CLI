@@ -4,7 +4,7 @@ The Helix CLI is the AI coding agent built for the terminal to access and work (
 
 It is powerfull programming tool which intracts with end user and makes possible flawless code implementation on the projects, refactopring, debugging, etc.
 
-## Important power feature
+## Dynamic hardware analysis and optimization
 
 The CLI makes possible for end users to build and run local LLMs and use them for code generation, testing, debugging, etc. However, most important is that Toolking, Thinking and other LLM capabilities may be flwalessly used on low end computer systems (by using 7B LLMs). On more capable machines, dynamically detrmined, more powerful LLMs may be used - 32b and similar.
 
@@ -72,6 +72,7 @@ All this will be done in parallel and synchornized. Default number of workers (b
 - Export and import of helix.json and the database will be possible - in sql and json formats
 - Theming - Default theme will be based on default ascii code generated LOGO presented at the top of Terminal UI. It will be in green-ish colors. However we will have the following color themes which user can change too: warm red, blue, green, yellow, gold, grey, white, darcula, dark blue, violet, warm orange, etc.
 User will be able to clone the theme and change the value, save the theme under the new name. All this will be stored in the database and will be loaded when user starts the application.
+- Pause / Resume / Detash - User will be able to pause working session and to continue it later! Also, it will be able to detach from it which will not interrupt current session but will allow to continue in the background (non-interactive mode with all questions and permissions accepted).
 
 ### CLI (Headless) features
 
@@ -126,3 +127,11 @@ Helix CLI will be possible to build and deploy for all operating systems as the 
 As we have mentioned we will have default Terminal UI CLI Agent, but pure CLI (Headless) as well. All this to run efficiently on all major operating systems such as: Linux, macOS, BSDs, Windows.
 
 REST API flavor will have several client adaptations so on top of this the following clients will be implemented to cover all features offered by the Terminal UI! Web client, Desktops and Mobile apps. They will all access the local or remote REST API endpoints (which could be local host by default or configurable remote instance).
+
+## Automation scripts
+
+All steps - building, testing, generating the documentation, diagrams, etc. will be fully automatized by proper bash scripts.
+
+## Launcher icon
+
+Whenever Helix CLI process in some of its forms is running to the user in its operating system proper icon in some form (launcher icon) will be presented. For that purpose generate the icon(s) from the Logo.png from the Assets folder.

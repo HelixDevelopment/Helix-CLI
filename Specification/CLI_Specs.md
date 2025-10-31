@@ -142,19 +142,27 @@ Whenever Helix CLI process in some of its forms is running to the user in its op
 
 ## Unsorted points
 
-- Design - Create all design in Figma and Penpot dormat
-- Import Figma.project to connected Figma acc. if any
-- Anyb design change -> new ver. -> Figma import
-- Design mode - Import frim Figma - Apply to project
-- Modes flow - Modes can call each other when needed and obtain results, each called mode will use its worker
+These points have to be assigned as extension to the sections and points from above
+
+- Design - Besides Plan, Build, etc we have another one mode - Design. It creates all designs in Figma and Penpot formats
+  - Import Figma created designs into the Figma project via connected Figma account (if any available)
+  - Penpot as well
+  - Figma and Penpot configuration wizrd as part of every Helix CLI variant - Terminal UI, CLI, REST API, etc.
+  - Figma and Penpot configuration will be part of helix.json configuration
+- Any design change we do creates new new version which is then imported into Figma project using the API
+- Design mode: Import from Figma and Apply to the project
+  - Having possibility of syncing changes in both directions
+  - Same applies for the Penpot
+- Modes flow - Modes can call each other during the development and realisation of the requests (modes may produce various results), each called mode will use its worker LLM model
 - Hierarchy if mode calls with workers working in them always presented. Also hierarchi relative to project -> module -> submodule -> modes calls (add this into the architecture)
-- models - one for all modes or diff or mixed per mode, dynamic too
-- twst cases documenting as examples for start for e2e and f.a.
-- helix cli dockerization with exposed clis
-- Predefined mode flows: planning -> build -> test (create flow dynamically from just planning mode), then exec
-- Log everything in database
-- Logs viewer (load logs from session or any step) for analysis and research
-- Clients - Browser projwcts and sessions, join or manipulate remotely
+- Models - one for all modes or different or mixed per mode, dynamic obtained as well (determine which available model is most proper for current mode - Planner, Builder, etc.)
+- Create use cases, all flows, all edge cases, documented as real tests to be implemented in e2e and full-automation tests.
+- helix cli dockerization with exposed clis - proper documentation
+- Predefined mode flows: planning -> building -> testing -> deployment or, create flow dynamically - start the planning mode from which will be decided how the whole implementation flow will look like, then run it
+- Log everything into the database
+  - Logs viewer (load logs from the whole project, whole module, session, individual request or any step) for analysis and research
+  - Support proper filtering
+- Clients - Browser projcts, modules, sessions or indicidual requests - join them or manipulate each of it remotely
 - Document hardware capability analisys
 - Obtain details and capabilities from models and providers dynamically
 - Problems tollerance handling

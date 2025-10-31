@@ -1,0 +1,6 @@
+[submodule "Example_Projects/OpenCode/OpenCode"]
+	path = Example_Projects/OpenCode/OpenCode
+	url = git@github.com:opencode-ai/opencode.git
+[submodule "Example_Projects/OpenCode/Homebrew-Tap"]
+	path = Example_Projects/OpenCode/Homebrew-Tap
+	url = git@github.com:opencode-ai/homebrew-tap.git

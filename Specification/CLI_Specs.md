@@ -43,11 +43,38 @@ All utils have to be decoupled and other components for installation, configurat
 
 Same principle we described for LLama CPP and Ollama will be applied to other platforms and their LLMs.
 
-## CLI UI features
+## CLI (Terminal UI) features
+
+- Testing
+- Refactoring
+- Planning
+- Builder (Code generation)
+- Refactorer
+- Tester
+- Debugger
+- Default project is the current directory
+- If no Helix.md is available user will be asked to allow creation of it
+  - Creation will scan the whole project up to the details and write to the file
+  - Format and rules are same as for AGENTS.md or CLAUDE.md
+  - If any existing file is found of other agents like CLaude or OpenCode it will be used to support the project's Helix.md generation
+  - We will detect all sub-projects and modules. For each of it individual agent file (Helix.md) will be created
+- User is able to switch between projects and modules (into deeper hierarchy and to go back)
+- User is able to send command sequentially (requests) to the CLI agent which will execute them
+- Using tab user can switch between the modes (Builder and others)
+- User will be asked about every action that agent is going to do such as write into the file, execute the system command, util, etc. There will be option to skip, accept, accept for the whole session, accept forever for the current project
+- All configuration and choices are going to be written in json configuration file: ~/.config/Helix/helix.json
+- User will be able to switch modles by choosing provider (LLama CPP, DeepSeek, Qwen, Claude, etc.) and proper model (this will be stored in helix.json file as setting)
+- All this operation will be dopne by proper set of commands sent to the agent, we will use a exact same command like Crush has with some differences: we will be able to paste from clipboard request that we want to send; we are going to be able to repeat all requests sent to agent. All requests will be stored in Postgres database using dagtabse component. The whole history of requests will be rememebred so we can scroll through it and repeat any request.
+- User will be able to add requests from history to favorites and to group them! There will be command / section so user can pick some and execute regularly! All this is going to be sotred in the database
+- Export and import of helix.json and the database will be possible - in sql and json formats
 
 ### CLI (Headless) features
 
+- All above but without UI - executed interactively or non-interactively (non-interactive mode is useful for automation and default one)
+
 ### REST API features
+
+- All above but without UI - executed interactively or non-interactively (non-interactive mode is useful for automation and default one) through REST API
 
 ## Testing
 

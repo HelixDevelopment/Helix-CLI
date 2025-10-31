@@ -1,3 +1,3 @@
 # Helix CLI
 
-Tbd
+- Specification: [Specification/CLI_Specs.md](Specification/CLI_Specs.md)

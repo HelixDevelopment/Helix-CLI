@@ -1,3 +1,5 @@
+![JIRA alternative for the free world!](Assets/Wide_Black.png)
+
 # Helix CLI Specs
 
 The Helix CLI is the AI coding agent built for the terminal to access and work (code, test, debug, etc.) with LLMs. Primary provider is LLama CPP, however it supports all other options such as work with remote APIs - DeepSeek, Qwen, Claude, Gemini, Grok, Mistral, etc. It supports various other providers like OpenRouter, Ollama, Nvidia, HuggingFace, etc.

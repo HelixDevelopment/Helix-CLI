@@ -55,7 +55,7 @@ All this will be done in parallel and synchornized. Default number of workers (b
 - Refactorer - Performs codebase refactoring
 - Tester - Executes all available tests, brings up all required apps and emulators as precoditions, generates reports, fixes discovered issues and finall does the SonqrQube and Snyk scanning.
 - Debugger
-- Diagrams (creation of UML diagrams and others from the Project and its docs and source code in supported formats - drawio, png, jpeg, uml, pdf, etc.) Default is drawio.
+- Diagrams (creation of UML diagrams and others from the Project and its docs and source code in supported formats - drawio, Mermaid.js, png, jpeg, uml, pdf, etc.) Default is drawio.
 - Deployment (deploying the project to the cloud or any other defined endpoint)
 - Default project is the current directory
 - If no Helix.md is available user will be asked to allow creation of it
@@ -117,7 +117,8 @@ For all features, modules, components, tests, everything must be created proper 
 
 In this mode user will be able to create diagrams in proper format for entire project and for specific modules. Default export format is drawio, but user may want to export into a different one or multiple formats at the same time. All this will be supported and will be available in the project.
 
-Helic CLI itself will have allk diagrams generated and ready for users to analyse. We must have them all integrated as the part of the documentation - PNG images which will open in draw.io the .drawio diagram file.
+Helic CLI itself will have allk diagrams generated and ready for users to analyse. We must have them all integrated as the part of the documentation - Mermaid.js
+ io markdowns.
 
 ## Deployment
 

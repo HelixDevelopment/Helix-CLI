@@ -92,6 +92,10 @@ User will be able to clone the theme and change the value, save the theme under 
 - Filtering sessions by active, stuck, completed, etc.
 - Session monitoring - show commands executed by the agent and their results, cpu and memory usage, etc. ("monitor" command)
 
+## Memory
+
+All work done will be stored in database in several layers as working memory so LLMs will be able to use it and continue where they left of! The structire of remembering will be Project -> All done so far -> Current sessions -> Current work in progress. Once user re-executes the request, or types similar one and sends it to execution, system will recognize it as already in progress and will not execute it again! It will update on current status after check and next steps, then continue with work. If there is no such work done on project at the moment fresh new operation will be done to achieve golas from the request sent.
+
 ## Testing
 
 Tbd

@@ -52,6 +52,7 @@ Same principle we described for LLama CPP and Ollama will be applied to other pl
 - Refactorer
 - Tester
 - Debugger
+- Diagrams (creation of UML diagrams and others from the Project and its docs and source code in supported formats - drawio, png, jpeg, uml, pdf, etc.) Default is drawio.
 - Default project is the current directory
 - If no Helix.md is available user will be asked to allow creation of it
   - Creation will scan the whole project up to the details and write to the file
@@ -67,6 +68,8 @@ Same principle we described for LLama CPP and Ollama will be applied to other pl
 - All this operation will be dopne by proper set of commands sent to the agent, we will use a exact same command like Crush has with some differences: we will be able to paste from clipboard request that we want to send; we are going to be able to repeat all requests sent to agent. All requests will be stored in Postgres database using dagtabse component. The whole history of requests will be rememebred so we can scroll through it and repeat any request.
 - User will be able to add requests from history to favorites and to group them! There will be command / section so user can pick some and execute regularly! All this is going to be sotred in the database
 - Export and import of helix.json and the database will be possible - in sql and json formats
+- Theming - Default theme will be based on default ascii code generated LOGO presented at the top of Terminal UI. It will be in green-ish colors. However we will have the following color themes which user can change too: warm red, blue, green, yellow, gold, grey, white, darcula, dark blue, violet, warm orange, etc.
+User will be able to clone the theme and change the value, save the theme under the new name. All this will be stored in the database and will be loaded when user starts the application.
 
 ### CLI (Headless) features
 
@@ -76,6 +79,25 @@ Same principle we described for LLama CPP and Ollama will be applied to other pl
 
 - All above but without UI - executed interactively or non-interactively (non-interactive mode is useful for automation and default one) through REST API
 
+### Session work
+
+- All started work will define a session
+- Session can have a name
+- All active session within a Helix agent will be stored in the database
+- It will be possible to join to existing session using proipe "join" command and interacti with it from multiple places - for example user is connected via SSH or REST API from various computers. All this must work.
+- It will be possible to kill session which is stuck or we do not want it anymore with command "kill" passed to Helix CLI from the terminal
+- It will be possible to list all active sessions with command "sessions"
+- Filtering sessions by active, stuck, completed, etc.
+- Session monitoring - show commands executed by the agent and their results, cpu and memory usage, etc. ("monitor" command)
+
 ## Testing
+
+Tbd
+
+## Documentation
+
+Tbd
+
+## Diagrams
 
 Tbd

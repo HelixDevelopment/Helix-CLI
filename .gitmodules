@@ -4,3 +4,15 @@
 [submodule "Example_Projects/OpenCode/Homebrew-Tap"]
 	path = Example_Projects/OpenCode/Homebrew-Tap
 	url = git@github.com:opencode-ai/homebrew-tap.git
+[submodule "Example_Projects/Ollama_Code"]
+	path = Example_Projects/Ollama_Code
+	url = git@github.com:tcsenpai/ollama-code.git
+[submodule "Example_Projects/Qwen_Code"]
+	path = Example_Projects/Qwen_Code
+	url = git@github.com:QwenLM/qwen-code.git
+[submodule "Example_Projects/Codename_Goose"]
+	path = Example_Projects/Codename_Goose
+	url = git@github.com:jgenerali/codename-goose.git
+[submodule "Example_Projects/Claude_Code"]
+	path = Example_Projects/Claude_Code
+	url = git@github.com:anthropics/claude-code.git

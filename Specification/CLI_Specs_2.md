@@ -1,3 +1,5 @@
+![JIRA alternative for the free world!](../Assets/Wide_Black.png)
+
 # Helix CLI Specification v2.0
 
 *As the guide for examples of implementation of existing solutions we provide git submodules with source codes of OpenCode, Charm Crush, Ollama Code, Codename Goose, Gemini Code, Qwen Code. It will be done full analysis of the approaches that have been used in each of those projects and then used for our needs - architectural best ideas, whole feature implementations, or just partial on top of which we will be building further and do significant fixes and improvements.*

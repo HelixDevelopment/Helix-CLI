@@ -138,3 +138,40 @@ All steps - building, testing, generating the documentation, diagrams, etc. will
 ## Launcher icon
 
 Whenever Helix CLI process in some of its forms is running to the user in its operating system proper icon in some form (launcher icon) will be presented. For that purpose generate the icon(s) from the Logo.png from the Assets folder.
+
+## Unsorted points
+
+- Design - Create all design in Figma and Penpot dormat
+- Import Figma.project to connected Figma acc. if any
+- Anyb design change -> new ver. -> Figma import
+- Design mode - Import frim Figma - Apply to project
+- Modes flow - Modes can call each other when needed and obtain results, each called mode will use its worker
+- Hierarchy if mode calls with workers working in them always presented. Also hierarchi relative to project -> module -> submodule -> modes calls (add this into the architecture)
+- models - one for all modes or diff or mixed per mode, dynamic too
+- twst cases documenting as examples for start for e2e and f.a.
+- helix cli dockerization with exposed clis
+- Predefined mode flows: planning -> build -> test (create flow dynamically from just planning mode), then exec
+- Log everything in database
+- Logs viewer (load logs from session or any step) for analysis and research
+- Clients - Browser projwcts and sessions, join or manipulate remotely
+- Document hardware capability analisys
+- Obtain details and capabilities from models and providers dynamically
+- Problems tollerance handling
+- Join by QR code
+- Obtain all models from OpenCode - Zen provider - Free first
+- Sharing - Access to Project, Session, etc (protected with credentials if accounts available - optional)
+- Accounts management (optional)
+- Rest uses http3
+- One model for modes - single vs multi instance
+- Porting mode
+- Fallback models
+- Models configuration wizard for project, module, etc.
+- Multiple api keys support
+- Models processes manager / monitor with performance monitoring and alerts
+- Delegating work to multiple machines - nodes (slaves) - instead of join command to have connect or similar
+- Remote share connect
+
+### Finally
+
+- Reorganize and fill the gaps of specs doc so it is perfect specification
+- Create task units for ai impl.

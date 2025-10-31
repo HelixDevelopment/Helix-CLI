@@ -48,11 +48,13 @@ Same principle we described for LLama CPP and Ollama will be applied to other pl
 - Testing
 - Refactoring
 - Planning
-- Builder (Code generation)
-- Refactorer
-- Tester
+- Builder (Code generation) - Creates the code using LLMs. It spwans multiple builders which will split the codebase into modules and generate the code for each module. Each worker (LLM builder) will generate the code for single module.
+All this will be done in parallel and synchornized. Default number of workers (builders) is one. User can set the number of workers to be used. There will be another builder running - the coordinator which will accept work done by workers and put it properly so no conflicts happen!
+- Refactorer - Performs codebase refactoring
+- Tester - Executes all available tests, brings up all required apps and emulators as precoditions, generates reports, fixes discovered issues and finall does the SonqrQube and Snyk scanning.
 - Debugger
 - Diagrams (creation of UML diagrams and others from the Project and its docs and source code in supported formats - drawio, png, jpeg, uml, pdf, etc.) Default is drawio.
+- Deployment (deploying the project to the cloud or any other defined endpoint)
 - Default project is the current directory
 - If no Helix.md is available user will be asked to allow creation of it
   - Creation will scan the whole project up to the details and write to the file

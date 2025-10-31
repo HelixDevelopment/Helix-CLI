@@ -174,16 +174,13 @@ These points have to be assigned as extension to the sections and points from ab
 - Sharing - Access to Project, Session, etc (protected with credentials if accounts available - optional) - We must be able to share whole project, module, session, etc. by link. If accounts available - we must be able to share by account / credentials protection so that only authorized user will be able to access it.
 - Accounts management (optional) - Create account, login, logout, etc. Accounts will have permissions to access projects, modules, sessions, etc. All this has to be configurable. Settings for this will go in Postgres datrabase.
 - Rest uses http3 - All REST API will use http3 / quic / cronet and all clients that will communicate with it
-- One model for modes - single vs multi instance
-- Porting mode
-- Fallback models
-- Models configuration wizard for project, module, etc.
-- Multiple api keys support
-- Models processes manager / monitor with performance monitoring and alerts
-- Delegating work to multiple machines - nodes (slaves) - instead of join command to have connect or similar
-- Remote share connect
-
-### Finally
-
-- Reorganize and fill the gaps of specs doc so it is perfect specification
-- Create task units for ai impl.
+- One model for modes - single vs multi instance - Make sure that if we decide to use same model for multiple modes, will it be one same shared instance, or instance per mode - this will be configurable.
+- Porting mode - Mode for porting applications from one codebase into others. Identifiying replacements for destination technology and creating equivalent to the source one.
+- Fallback models - If some model fails with the execution (API fails), use first configured fallback model (if any). All this will be configured in helix.json and proper UI / UX defined for it.
+- Models configuration wizard for project, module, etc. - Models configuration will allow to define models used by different modes or hierarchy levels - general global, per project, per module, per sesssion, etc - this will be one part sotred in helix.json and another part in database (per hierarchy instance item such as individual project, individual module, individual session). All global level goes to helix.json.
+- Multiple api keys support - For each model which requires API key we will have to support multiple keys. Then, when it comes to multiple instances of the model use we may always use the first available key.
+- Models processes manager / monitor with performance monitoring and alerts - Entering this part of Terminal UI or one of the client's UIs for this we will see all active models, where are they used and how much resources they are consuming.
+If system resources are draind proper warning or errors have to be presented. If we hit critical moment - system starts to glitch - running sessions have to be paused!
+- Delegating work to multiple machines - nodes (slaves) - instead of join command to have connect or similar. We must be able to do the work with multiple computers which are all joined to the same session. Or multiple sessions done by muultiple machines in parallel for one project, or module, etc. Like this each instance can instantiate the model and do the work. BAsed on exisiting mechanism it will run models with maximal performance and capabilities.
+- Remote share connect - We must be able to request connect from other machines (previous point extended), or to send request to remote machines to connect. For this has to be proper mechanism. Will machines automatically accpet the requests to connect and give its resources for joined work will be defined in helix.json as the part of the configuration. It will be configurable from all clients, cli and terminal UI.
+- For all communication between machines running Helix CLI we will use REST API. It will be configurable in helix.json as the part of the configuration. It will be configurable from all clients, cli and terminal UI. For all events that occur proper websocket events will be sent in real time and all connected participants will act on it.

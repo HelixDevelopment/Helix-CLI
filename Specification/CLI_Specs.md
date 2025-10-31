@@ -27,7 +27,7 @@ Some of the components that we are mentioning now are:
 - Pure CLI mode (Headless CLI mode)
 - CLI UI mode
 - REST API mode (run as server)
-- Postgres database component (run as server) - will be used by CLI UI and REST API, storing memories, progres, etc.
+- Postgres database component (run as server) - will be used by CLI UI and REST API, storing memories, progres, etc. Postgres database will be SQL Cipher protected!
 - Debugger component - make sure that debugging of software for issues detection is possible using LLMs. It investigates and collects information about software execution for further fixes and improvements or new features development.
 - Planner - Does the deep analysis and perfroms the planning with written documentation as result of this efforts - user inputs are required as always
 - Builder - Builds the code using LLMs, extends the features, fixes issues, etc.
@@ -167,13 +167,13 @@ These points have to be assigned as extension to the sections and points from ab
   - REST API will bind to default port or port from the helix.json configuration. If it is taken, it will bind to the first next abailable port
   - REST API and clients will support broadcasting of configuration and discovery of service. All client apps will be able to chose between discovered REST API instances or to configure one manually.
 - Hardware analysis which is base for selection of proper model and its size will be perfrormed deeply and all detected hardware maximally utilized - vram, ram, cpus, etc.
-- Obtain details and capabilities from models and providers dynamically
-- Problems tollerance handling
-- Join by QR code
-- Obtain all models from OpenCode - Zen provider - Free first
-- Sharing - Access to Project, Session, etc (protected with credentials if accounts available - optional)
-- Accounts management (optional)
-- Rest uses http3
+- Obtain details and capabilities from models and providers dynamically - context size allowed, api detials, etc. Based on this our API will be able to be used for all modes and to send proper instructions - Tooling and Thinkng, etc.
+- Problems tollerance handling - To fail if problems arise, or to try to fix them - this is the default setting (settings for this go in helix.json).
+- Join by QR code - User will be to join session from other terminal or device by QR code.
+- Obtain all models from OpenCode - Zen provider - Free first - Incorporate all free models and other supported from OpenCode Zen (API, etc.)
+- Sharing - Access to Project, Session, etc (protected with credentials if accounts available - optional) - We must be able to share whole project, module, session, etc. by link. If accounts available - we must be able to share by account / credentials protection so that only authorized user will be able to access it.
+- Accounts management (optional) - Create account, login, logout, etc. Accounts will have permissions to access projects, modules, sessions, etc. All this has to be configurable. Settings for this will go in Postgres datrabase.
+- Rest uses http3 - All REST API will use http3 / quic / cronet and all clients that will communicate with it
 - One model for modes - single vs multi instance
 - Porting mode
 - Fallback models

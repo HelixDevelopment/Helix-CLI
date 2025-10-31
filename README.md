@@ -2,6 +2,10 @@
 
 # Helix CLI
 
+- Specification V4: [Specification/CLI_Specs_2.md](Specification/CLI_Specs_3.md)
+
+## Old versions
+
 - Specification V1: [Specification/CLI_Specs.md](Specification/CLI_Specs.md)
 - Specification V2: [Specification/CLI_Specs_2.md](Specification/CLI_Specs_2.md)
 - Specification V3: [Specification/CLI_Specs_2.md](Specification/CLI_Specs_3.md)

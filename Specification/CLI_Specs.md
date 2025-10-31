@@ -162,8 +162,11 @@ These points have to be assigned as extension to the sections and points from ab
 - Log everything into the database
   - Logs viewer (load logs from the whole project, whole module, session, individual request or any step) for analysis and research
   - Support proper filtering
-- Clients - Browser projcts, modules, sessions or indicidual requests - join them or manipulate each of it remotely
-- Document hardware capability analisys
+- Clients - Each client will be able to: browse projcts, modules, sessions or indicidual requests and then to join them or manipulate each of it remotely (using REST API)
+  - Every running process of Helix CLI will bring up REST API whoch will be able to be used by the clients
+  - REST API will bind to default port or port from the helix.json configuration. If it is taken, it will bind to the first next abailable port
+  - REST API and clients will support broadcasting of configuration and discovery of service. All client apps will be able to chose between discovered REST API instances or to configure one manually.
+- Hardware analysis which is base for selection of proper model and its size will be perfrormed deeply and all detected hardware maximally utilized - vram, ram, cpus, etc.
 - Obtain details and capabilities from models and providers dynamically
 - Problems tollerance handling
 - Join by QR code

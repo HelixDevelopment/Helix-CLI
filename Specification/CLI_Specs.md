@@ -75,6 +75,7 @@ All this will be done in parallel and synchornized. Default number of workers (b
 - Theming - Default theme will be based on default ascii code generated LOGO presented at the top of Terminal UI. It will be in green-ish colors. However we will have the following color themes which user can change too: warm red, blue, green, yellow, gold, grey, white, darcula, dark blue, violet, warm orange, etc.
 User will be able to clone the theme and change the value, save the theme under the new name. All this will be stored in the database and will be loaded when user starts the application.
 - Pause / Resume / Detash - User will be able to pause working session and to continue it later! Also, it will be able to detach from it which will not interrupt current session but will allow to continue in the background (non-interactive mode with all questions and permissions accepted).
+- Rollback - User will be able to rollback to the previous state of the project! By chosing one of requests that have been completed all work of it will be reverted. User can chose chained rollback - to rollback the request done (changes) and everything that has later been done (other requests) with relation to it, or just rollback the single request work done. No module can stay disabled or broken or the test so in this operation mode all polishing and fixing will be performed to have project in usable stable state after the rollback work has been done.
 
 ### CLI (Headless) features
 

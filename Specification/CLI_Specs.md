@@ -98,12 +98,31 @@ All work done will be stored in database in several layers as working memory so 
 
 ## Testing
 
-Tbd
+Testing mode will be specifically used to test modules and project - running all tests, providing it all mandatory dependencies and writing test reports. All discovered issues will be resolved until 100% of tests is executed with succes.
+Mandatory SonarQube and Snyk testing will be performed.
+
+### Project testing
+
+All codebase of Helix CLI must be covered with all test types mentioned in this document. All test types must have coverage of codebase of 100%. Every single test and test case must execute 100% with success! It is mandatory to verify everything with SonarQube intensive deep testing and Snyk! Both will be performed with free versions (docker compose containers). Reports will be generated and any discovered issues will be fixed.
 
 ## Documentation
 
-Tbd
+For all features, modules, components, tests, everything must be created proper and detialed documentation. We must support end users documentation and developers documentaton. Every single document written has to be available in pure nicely styled too!
 
 ## Diagrams
 
-Tbd
+In this mode user will be able to create diagrams in proper format for entire project and for specific modules. Default export format is drawio, but user may want to export into a different one or multiple formats at the same time. All this will be supported and will be available in the project.
+
+Helic CLI itself will have allk diagrams generated and ready for users to analyse. We must have them all integrated as the part of the documentation - PNG images which will open in draw.io the .drawio diagram file.
+
+## Deployment
+
+In deployment mode user will be able to cretae deploymewnt profiles which will be executed and project to be delivered to the cloud or any other defined endpoint.
+
+Helix CLI will be possible to build and deploy for all operating systems as the multiplatform solution.
+
+### Supported deployments and flavors
+
+As we have mentioned we will have default Terminal UI CLI Agent, but pure CLI (Headless) as well. All this to run efficiently on all major operating systems such as: Linux, macOS, BSDs, Windows.
+
+REST API flavor will have several client adaptations so on top of this the following clients will be implemented to cover all features offered by the Terminal UI! Web client, Desktops and Mobile apps. They will all access the local or remote REST API endpoints (which could be local host by default or configurable remote instance).

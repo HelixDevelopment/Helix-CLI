@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # Test database
+  test-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: helix_test
+      POSTGRES_USER: helix_test
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - test_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helix_test -d helix_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Test worker nodes
+  test-worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-worker
+    hostname: test-worker-1
+    environment:
+      WORKER_NAME: "test-worker-1"
+      HELIX_CONFIG: "/app/config/test-config.yaml"
+    volumes:
+      - ./test/workers/ssh-keys:/root/.ssh:ro
+      - ./test/config:/app/config:ro
+    ports:
+      - "2222:22"
+    depends_on:
+      test-db:
+        condition: service_healthy
+
+  test-worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-worker
+    hostname: test-worker-2
+    environment:
+      WORKER_NAME: "test-worker-2"
+      HELIX_CONFIG: "/app/config/test-config.yaml"
+    volumes:
+      - ./test/workers/ssh-keys:/root/.ssh:ro
+      - ./test/config:/app/config:ro
+    ports:
+      - "2223:22"
+    depends_on:
+      test-db:
+        condition: service_healthy
+
+  test-worker-3:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-worker
+    hostname: test-worker-3
+    environment:
+      WORKER_NAME: "test-worker-3"
+      HELIX_CONFIG: "/app/config/test-config.yaml"
+    volumes:
+      - ./test/workers/ssh-keys:/root/.ssh:ro
+      - ./test/config:/app/config:ro
+    ports:
+      - "2224:22"
+    depends_on:
+      test-db:
+        condition: service_healthy
+
+  # Test runner
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-runner
+    environment:
+      DATABASE_URL: "postgres://helix_test:test_password@test-db:5432/helix_test?sslmode=disable"
+      TEST_WORKER_1_HOST: "test-worker-1"
+      TEST_WORKER_2_HOST: "test-worker-2"
+      TEST_WORKER_3_HOST: "test-worker-3"
+    volumes:
+      - ./test/workers/ssh-keys:/root/.ssh:ro
+      - ./test/config:/app/config:ro
+      - ./test/results:/app/test-results
+    depends_on:
+      test-db:
+        condition: service_healthy
+      test-worker-1:
+        condition: service_started
+      test-worker-2:
+        condition: service_started
+      test-worker-3:
+        condition: service_started
+    command: ["go", "test", "-v", "./test/e2e/...", "-tags=e2e"]
+
+volumes:
+  test_db_data:

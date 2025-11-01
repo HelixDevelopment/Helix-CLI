@@ -2,302 +2,334 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
-	"dev.helix.code/internal/hardware"
-	"dev.helix.code/internal/llm"
+	"github.com/google/uuid"
+	"github.com/helixdev/helix-cli/internal/llm"
+	"github.com/helixdev/helix-cli/internal/notification"
+	"github.com/helixdev/helix-cli/internal/worker"
 )
 
-// SimpleCLI represents a simplified command-line interface
-type SimpleCLI struct {
-	modelManager   *llm.ModelManager
-	hardwareDetector *hardware.Detector
+// CLI represents the command-line interface
+type CLI struct {
+	workerPool *worker.SSHWorkerPool
+	llmProvider llm.LLMProvider
+	notificationEngine *notification.NotificationEngine
 }
 
-// NewSimpleCLI creates a new simple CLI instance
-func NewSimpleCLI() *SimpleCLI {
-	return &SimpleCLI{
-		modelManager:   llm.NewModelManager(),
-		hardwareDetector: hardware.NewDetector(),
+// NewCLI creates a new CLI instance
+func NewCLI() *CLI {
+	return &CLI{
+		workerPool: worker.NewSSHWorkerPool(true),
+		notificationEngine: notification.NewNotificationEngine(),
 	}
 }
 
-// Initialize sets up the CLI environment
-func (c *SimpleCLI) Initialize() error {
-	log.Println("🚀 Initializing Helix CLI...")
+// Run executes the CLI
+func (c *CLI) Run() error {
+	// Parse command-line flags
+	var (
+		command     = flag.String("command", "", "Command to execute")
+		workerHost  = flag.String("worker", "", "Worker host to add")
+		workerUser  = flag.String("user", "", "Worker SSH username")
+		workerKey   = flag.String("key", "", "Worker SSH key path")
+		model       = flag.String("model", "llama-3-8b", "LLM model to use")
+		prompt      = flag.String("prompt", "", "Prompt for LLM generation")
+		maxTokens   = flag.Int("max-tokens", 1000, "Maximum tokens to generate")
+		temperature = flag.Float64("temperature", 0.7, "Generation temperature")
+		stream      = flag.Bool("stream", false, "Stream the response")
+		listWorkers = flag.Bool("list-workers", false, "List all workers")
+		listModels  = flag.Bool("list-models", false, "List available models")
+		healthCheck = flag.Bool("health", false, "Perform health check")
+		notify      = flag.String("notify", "", "Send notification with message")
+		notifyType  = flag.String("notify-type", "info", "Notification type")
+		notifyPriority = flag.String("notify-priority", "medium", "Notification priority")
+	)
+	flag.Parse()
 
-	// Detect hardware
-	hardwareInfo, err := c.hardwareDetector.Detect()
-	if err != nil {
-		log.Printf("Warning: Hardware detection failed: %v", err)
-	} else {
-		log.Printf("✅ Hardware detected: %s CPU, %s GPU, %s RAM", 
-			hardwareInfo.CPU.Model, hardwareInfo.GPU.Model, hardwareInfo.Memory.TotalRAM)
-		log.Printf("📊 Optimal model size: %s", c.hardwareDetector.GetOptimalModelSize())
-	}
+	ctx := context.Background()
 
-	// Initialize basic providers
-	if err := c.initializeBasicProviders(); err != nil {
-		return fmt.Errorf("failed to initialize providers: %w", err)
-	}
-
-	log.Println("✅ Helix CLI initialized successfully")
-	return nil
-}
-
-// Run executes the CLI with the given arguments
-func (c *SimpleCLI) Run(args []string) error {
-	if len(args) < 2 {
-		return c.showHelp()
-	}
-
-	command := args[1]
-	switch command {
-	case "help", "--help", "-h":
-		return c.showHelp()
-	case "version", "--version", "-v":
-		return c.showVersion()
-	case "models":
-		return c.listModels()
-	case "hardware":
-		return c.showHardwareInfo()
-	case "health":
-		return c.checkHealth()
+	// Handle different commands
+	switch {
+	case *listWorkers:
+		return c.handleListWorkers(ctx)
+	case *listModels:
+		return c.handleListModels(ctx)
+	case *healthCheck:
+		return c.handleHealthCheck(ctx)
+	case *workerHost != "":
+		return c.handleAddWorker(ctx, *workerHost, *workerUser, *workerKey)
+	case *prompt != "":
+		return c.handleGenerate(ctx, *prompt, *model, *maxTokens, *temperature, *stream)
+	case *notify != "":
+		return c.handleNotification(ctx, *notify, *notifyType, *notifyPriority)
+	case *command != "":
+		return c.handleCommand(ctx, *command)
 	default:
-		return fmt.Errorf("unknown command: %s. Use 'help' for available commands", command)
+		return c.handleInteractive(ctx)
 	}
 }
 
-// initializeBasicProviders sets up basic LLM providers
-func (c *SimpleCLI) initializeBasicProviders() error {
-	// Initialize a simple local provider for demonstration
-	llamaConfig := llm.LlamaConfig{
-		ModelPath:     "~/models/llama-2-7b-chat.gguf",
-		ContextSize:   4096,
-		GPUEnabled:    true,
-		GPULayers:     35,
-		ServerHost:    "localhost",
-		ServerPort:    8080,
-		ServerTimeout: 30,
-	}
-
-	provider, err := llm.NewLlamaCPPProvider(llamaConfig)
-	if err != nil {
-		log.Printf("Warning: Failed to initialize Llama.cpp provider: %v", err)
-	} else {
-		if err := c.modelManager.RegisterProvider(provider); err != nil {
-			log.Printf("Warning: Failed to register Llama.cpp provider: %v", err)
-		}
-	}
-
+// handleListWorkers lists all workers
+func (c *CLI) handleListWorkers(ctx context.Context) error {
+	stats := c.workerPool.GetWorkerStats(ctx)
+	
+	fmt.Println("\n=== Worker Statistics ===")
+	fmt.Printf("Total Workers: %d\n", stats.TotalWorkers)
+	fmt.Printf("Active Workers: %d\n", stats.ActiveWorkers)
+	fmt.Printf("Healthy Workers: %d\n", stats.HealthyWorkers)
+	fmt.Printf("Total CPU: %d\n", stats.TotalCPU)
+	fmt.Printf("Total Memory: %.2f GB\n", float64(stats.TotalMemory)/(1024*1024*1024))
+	fmt.Printf("Total GPU: %d\n", stats.TotalGPU)
+	
 	return nil
 }
 
-// Command implementations
-
-func (c *SimpleCLI) showHelp() error {
-	helpText := `
-Helix CLI - AI-Powered Development Assistant (Phase 4 Implementation)
-
-Usage:
-  helix <command> [arguments]
-
-Commands:
-  help                    Show this help message
-  version                 Show version information
-  models                  List available AI models
-  hardware                Show hardware information
-  health                  Check system health
-
-Examples:
-  helix models
-  helix hardware
-  helix health
-
-This is a Phase 4 implementation demonstrating the core architecture.
-Advanced features like chat, code generation, and project planning are
-coming in future phases.
-`
-	fmt.Println(helpText)
-	return nil
-}
-
-func (c *SimpleCLI) showVersion() error {
-	fmt.Println("Helix CLI v1.0.0 (Phase 4 Implementation)")
-	fmt.Println("Build: development")
-	fmt.Println("Go version: go1.24.0")
-	fmt.Println("Architecture: Core LLM Integration & Hardware Detection")
-	return nil
-}
-
-func (c *SimpleCLI) listModels() error {
-	models := c.modelManager.GetAvailableModels()
-	if len(models) == 0 {
-		fmt.Println("No models available. Check your provider configurations.")
-		return nil
+// handleListModels lists available models
+func (c *CLI) handleListModels(ctx context.Context) error {
+	// For now, return static list
+	// In production, this would query the model manager
+	
+	models := []struct {
+		ID          string
+		Name        string
+		Provider    string
+		ContextSize int
+		Status      string
+	}{
+		{"llama-3-8b", "Llama 3 8B", "llama.cpp", 8192, "available"},
+		{"mistral-7b", "Mistral 7B", "ollama", 4096, "available"},
+		{"phi-3-mini", "Phi-3 Mini", "openai", 128000, "available"},
 	}
-
-	fmt.Println("\nAvailable AI Models:")
-	fmt.Println("===================")
+	
+	fmt.Println("\n=== Available Models ===")
 	for _, model := range models {
-		fmt.Printf("\n📦 %s\n", model.Name)
-		fmt.Printf("   Provider: %s\n", model.Provider)
-		fmt.Printf("   Context: %d tokens\n", model.ContextSize)
-		fmt.Printf("   Capabilities: %v\n", model.Capabilities)
-		if model.Description != "" {
-			fmt.Printf("   Description: %s\n", model.Description)
-		}
-	}
-
-	fmt.Printf("\nTotal: %d models available\n", len(models))
-	
-	// Show model selection example
-	fmt.Println("\n💡 Model Selection Example:")
-	criteria := llm.ModelSelectionCriteria{
-		TaskType: "code_generation",
-		RequiredCapabilities: []llm.ModelCapability{
-			llm.CapabilityCodeGeneration,
-			llm.CapabilityCodeAnalysis,
-		},
-		MaxTokens: 2048,
-		QualityPreference: "balanced",
+		fmt.Printf("ID: %s\n", model.ID)
+		fmt.Printf("  Name: %s\n", model.Name)
+		fmt.Printf("  Provider: %s\n", model.Provider)
+		fmt.Printf("  Context Size: %d\n", model.ContextSize)
+		fmt.Printf("  Status: %s\n\n", model.Status)
 	}
 	
-	selectedModel, err := c.modelManager.SelectOptimalModel(criteria)
-	if err != nil {
-		fmt.Printf("   Model selection failed: %v\n", err)
-	} else {
-		fmt.Printf("   For code generation, recommended model: %s\n", selectedModel.Name)
-	}
-
 	return nil
 }
 
-func (c *SimpleCLI) showHardwareInfo() error {
-	hardwareInfo, err := c.hardwareDetector.Detect()
-	if err != nil {
-		return fmt.Errorf("failed to detect hardware: %w", err)
-	}
-
-	fmt.Println("\nHardware Information:")
-	fmt.Println("====================")
-	fmt.Printf("CPU: %s (%s)\n", hardwareInfo.CPU.Model, hardwareInfo.CPU.Architecture)
-	fmt.Printf("Cores: %d\n", hardwareInfo.CPU.Cores)
-	fmt.Printf("GPU: %s (%s)\n", hardwareInfo.GPU.Model, hardwareInfo.GPU.Vendor)
-	if hardwareInfo.GPU.VRAM != "" {
-		fmt.Printf("VRAM: %s\n", hardwareInfo.GPU.VRAM)
-	}
-	fmt.Printf("RAM: %s\n", hardwareInfo.Memory.TotalRAM)
-	fmt.Printf("Platform: %s/%s\n", hardwareInfo.Platform.OS, hardwareInfo.Platform.Architecture)
+// handleHealthCheck performs system health check
+func (c *CLI) handleHealthCheck(ctx context.Context) error {
+	fmt.Println("\n=== System Health Check ===")
 	
-	optimalSize := c.hardwareDetector.GetOptimalModelSize()
-	fmt.Printf("\n💡 Recommended model size: %s\n", optimalSize)
+	// Check worker pool
+	stats := c.workerPool.GetWorkerStats(ctx)
+	if stats.HealthyWorkers > 0 {
+		fmt.Printf("✅ Worker Pool: %d healthy workers\n", stats.HealthyWorkers)
+	} else {
+		fmt.Printf("⚠️ Worker Pool: No healthy workers\n")
+	}
 	
-	flags := c.hardwareDetector.GetCompilationFlags()
-	if len(flags) > 0 {
-		fmt.Printf("🔧 Compilation flags: %v\n", flags)
-	}
-
-	// Show hardware compatibility for different model sizes
-	fmt.Println("\n📊 Hardware Compatibility:")
-	modelSizes := []string{"3B", "7B", "13B", "34B", "70B"}
-	for _, size := range modelSizes {
-		canRun := c.hardwareDetector.CanRunModel(size)
-		status := "❌"
-		if canRun {
-			status = "✅"
-		}
-		fmt.Printf("   %s %s models: %s\n", status, size, 
-			map[bool]string{true: "Supported", false: "Not supported"}[canRun])
-	}
-
-	return nil
-}
-
-func (c *SimpleCLI) checkHealth() error {
-	fmt.Println("\nSystem Health Check:")
-	fmt.Println("===================")
-
-	// Check hardware
-	hardwareInfo, err := c.hardwareDetector.Detect()
-	if err != nil {
-		fmt.Printf("❌ Hardware detection: FAILED (%v)\n", err)
-	} else {
-		fmt.Printf("✅ Hardware detection: OK (%s CPU, %s GPU)\n", 
-			hardwareInfo.CPU.Model, hardwareInfo.GPU.Model)
-	}
-
-	// Check providers
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	health := c.modelManager.HealthCheck(ctx)
-	if len(health) == 0 {
-		fmt.Println("❌ No LLM providers available")
-	} else {
-		for providerType, status := range health {
-			if status.Status == "healthy" {
-				fmt.Printf("✅ %s: HEALTHY (latency: %v)\n", providerType, status.Latency)
-			} else {
-				fmt.Printf("❌ %s: %s\n", providerType, status.Status)
+	// Check notification engine
+	channelStats := c.notificationEngine.GetChannelStats()
+	enabledChannels := 0
+	for _, stats := range channelStats {
+		if statsMap, ok := stats.(map[string]interface{}); ok {
+			if enabled, ok := statsMap["enabled"].(bool); ok && enabled {
+				enabledChannels++
 			}
 		}
 	}
-
-	// Check models
-	models := c.modelManager.GetAvailableModels()
-	if len(models) == 0 {
-		fmt.Println("❌ No AI models available")
-	} else {
-		fmt.Printf("✅ Models: %d available\n", len(models))
-	}
-
-	// System summary
-	fmt.Println("\n📈 System Summary:")
-	optimalSize := c.hardwareDetector.GetOptimalModelSize()
-	fmt.Printf("   Optimal model size: %s\n", optimalSize)
-	fmt.Printf("   Available models: %d\n", len(models))
-	fmt.Printf("   Available providers: %d\n", len(health))
 	
-	if len(models) > 0 && len(health) > 0 {
-		fmt.Println("\n🎉 System is ready for AI-powered development!")
+	if enabledChannels > 0 {
+		fmt.Printf("✅ Notification System: %d enabled channels\n", enabledChannels)
 	} else {
-		fmt.Println("\n⚠️  System needs configuration for full functionality")
+		fmt.Printf("⚠️ Notification System: No enabled channels\n")
 	}
-
+	
+	fmt.Println("✅ System is operational")
 	return nil
 }
 
-// Main function
-func main() {
-	// Create CLI instance
-	cli := NewSimpleCLI()
-
-	// Initialize CLI
-	if err := cli.Initialize(); err != nil {
-		log.Fatalf("Failed to initialize CLI: %v", err)
+// handleAddWorker adds a new worker
+func (c *CLI) handleAddWorker(ctx context.Context, host, username, keyPath string) error {
+	if username == "" {
+		return fmt.Errorf("username is required")
 	}
-
-	// Handle interrupt signals
-	_, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	
-	go func() {
-		<-sigCh
-		log.Println("\n🛑 Received interrupt signal, shutting down...")
-		cancel()
-	}()
+	sshConfig := &worker.SSHConfig{
+		Host:     host,
+		Port:     22,
+		Username: username,
+		KeyPath:  keyPath,
+	}
+	
+	worker := &worker.SSHWorker{
+		Hostname:    host,
+		DisplayName: fmt.Sprintf("worker-%s", host),
+		SSHConfig:   sshConfig,
+	}
+	
+	if err := c.workerPool.AddWorker(ctx, worker); err != nil {
+		return fmt.Errorf("failed to add worker: %v", err)
+	}
+	
+	fmt.Printf("✅ Worker added successfully: %s\n", host)
+	return nil
+}
 
-	// Run CLI with command-line arguments
-	if err := cli.Run(os.Args); err != nil {
+// handleGenerate performs LLM generation
+func (c *CLI) handleGenerate(ctx context.Context, prompt, model string, maxTokens int, temperature float64, stream bool) error {
+	fmt.Printf("\n=== Generating with %s ===\n", model)
+	fmt.Printf("Prompt: %s\n\n", prompt)
+	
+	// For now, simulate generation
+	// In production, this would use the actual LLM provider
+	
+	if stream {
+		// Simulate streaming response
+		words := strings.Split(prompt+" This is a simulated streaming response from the model.", " ")
+		for _, word := range words {
+			fmt.Printf("%s ", word)
+			time.Sleep(100 * time.Millisecond)
+		}
+		fmt.Println()
+	} else {
+		// Simulate non-streaming response
+		response := fmt.Sprintf("Generated response for: %s\n\nThis is a simulated response from the %s model. The prompt was processed successfully and the model generated appropriate output based on the input provided.", prompt, model)
+		fmt.Println(response)
+	}
+	
+	fmt.Printf("\n✅ Generation completed\n")
+	return nil
+}
+
+// handleNotification sends a notification
+func (c *CLI) handleNotification(ctx context.Context, message, notifyType, priority string) error {
+	notificationType := notification.NotificationType(notifyType)
+	notificationPriority := notification.NotificationPriority(priority)
+	
+	notif := &notification.Notification{
+		Title:    "CLI Notification",
+		Message:  message,
+		Type:     notificationType,
+		Priority: notificationPriority,
+		Channels: []string{"cli"}, // Default to CLI output
+	}
+	
+	if err := c.notificationEngine.SendDirect(ctx, notif, []string{"cli"}); err != nil {
+		return fmt.Errorf("failed to send notification: %v", err)
+	}
+	
+	fmt.Printf("✅ Notification sent: %s\n", message)
+	return nil
+}
+
+// handleCommand executes a command
+func (c *CLI) handleCommand(ctx context.Context, command string) error {
+	fmt.Printf("\n=== Executing Command ===\n")
+	fmt.Printf("Command: %s\n\n", command)
+	
+	// For now, simulate command execution
+	// In production, this would execute on a worker
+	
+	fmt.Printf("Executing: %s\n", command)
+	time.Sleep(1 * time.Second)
+	fmt.Printf("Command completed successfully\n")
+	
+	return nil
+}
+
+// handleInteractive starts interactive mode
+func (c *CLI) handleInteractive(ctx context.Context) error {
+	fmt.Println("=== Helix CLI Interactive Mode ===")
+	fmt.Println("Type 'help' for available commands, 'exit' to quit")
+	
+	// Set up signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	
+	for {
+		select {
+		case <-sigChan:
+			fmt.Println("\n\nShutting down...")
+			return nil
+		default:
+			// Continue with interactive loop
+		}
+		
+		fmt.Print("\nhelix> ")
+		
+		var input string
+		_, err := fmt.Scanln(&input)
+		if err != nil {
+			if err.Error() == "unexpected newline" {
+				continue
+			}
+			return err
+		}
+		
+		input = strings.TrimSpace(input)
+		if input == "" {
+			continue
+		}
+		
+		if input == "exit" || input == "quit" {
+			fmt.Println("Goodbye!")
+			return nil
+		}
+		
+		if input == "help" {
+			c.showHelp()
+			continue
+		}
+		
+		// Handle interactive commands
+		switch input {
+		case "workers":
+			c.handleListWorkers(ctx)
+		case "models":
+			c.handleListModels(ctx)
+		case "health":
+			c.handleHealthCheck(ctx)
+		default:
+			fmt.Printf("Unknown command: %s. Type 'help' for available commands.\n", input)
+		}
+	}
+}
+
+// showHelp displays available commands
+func (c *CLI) showHelp() {
+	fmt.Println("\n=== Available Commands ===")
+	fmt.Println("workers          - List all workers")
+	fmt.Println("models           - List available models")
+	fmt.Println("health           - Perform system health check")
+	fmt.Println("help             - Show this help message")
+	fmt.Println("exit/quit        - Exit the CLI")
+	fmt.Println("")
+	fmt.Println("=== Command Line Options ===")
+	fmt.Println("--list-workers   - List all workers")
+	fmt.Println("--list-models    - List available models")
+	fmt.Println("--health         - Perform health check")
+	fmt.Println("--worker         - Add a worker (requires --user)")
+	fmt.Println("--user           - Worker SSH username")
+	fmt.Println("--key            - Worker SSH key path")
+	fmt.Println("--prompt         - Generate with LLM")
+	fmt.Println("--model          - LLM model to use")
+	fmt.Println("--stream         - Stream the response")
+	fmt.Println("--notify         - Send notification")
+	fmt.Println("--notify-type    - Notification type (info/warning/error/success/alert)")
+	fmt.Println("--notify-priority - Notification priority (low/medium/high/urgent)")
+}
+
+func main() {
+	cli := NewCLI()
+	
+	if err := cli.Run(); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 }

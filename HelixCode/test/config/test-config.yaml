@@ -1,0 +1,63 @@
+# Test Configuration for Helix CLI
+
+global:
+  theme: "default"
+  auto_confirm: false
+  max_workers: 4
+  log_level: "debug"
+  data_dir: "/tmp/helix-test"
+  cache_dir: "/tmp/helix-test-cache"
+
+# Distributed worker configuration for testing
+workers:
+  enabled: true
+  pool:
+    test-worker-1:
+      host: "test-worker-1"
+      port: 22
+      username: "root"
+      key_path: "/root/.ssh/id_rsa"
+      capabilities: ["llm-inference", "code-generation", "testing"]
+      display_name: "Test Worker 1"
+    test-worker-2:
+      host: "test-worker-2"
+      port: 22
+      username: "root"
+      key_path: "/root/.ssh/id_rsa"
+      capabilities: ["code-generation", "refactoring"]
+      display_name: "Test Worker 2"
+    test-worker-3:
+      host: "test-worker-3"
+      port: 22
+      username: "root"
+      key_path: "/root/.ssh/id_rsa"
+      capabilities: ["testing", "debugging"]
+      display_name: "Test Worker 3"
+  auto_install: true
+  health_check_interval: 10
+  max_concurrent_tasks: 5
+  task_timeout: 300
+
+# LLM configuration for testing
+llm:
+  llamacpp:
+    enabled: false  # Disabled in test environment
+  ollama:
+    enabled: false  # Disabled in test environment
+  openai:
+    enabled: false  # Disabled in test environment
+
+# Database configuration for testing
+database:
+  host: "test-db"
+  port: 5432
+  user: "helix_test"
+  password: "test_password"
+  dbname: "helix_test"
+  ssl_mode: "disable"
+
+# Test-specific settings
+test:
+  environment: "docker"
+  timeout_multiplier: 2.0
+  cleanup_after_tests: true

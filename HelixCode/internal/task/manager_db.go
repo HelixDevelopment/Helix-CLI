@@ -164,7 +164,7 @@ func (m *DatabaseManager) GetTask(ctx context.Context, id string) (*Task, error)
 		Dependencies:     dependencies,
 		RetryCount:       retryCount,
 		MaxRetries:       maxRetries,
-		ErrorMessage:     errorMessage,
+		ErrorMessage:     getStringFromPtr(errorMessage),
 		ResultData:       resultData,
 		CheckpointData:   checkpointData,
 		StartedAt:        startedAt,
@@ -317,12 +317,12 @@ func (m *DatabaseManager) CompleteTask(ctx context.Context, id string, result ma
 		WHERE id = $2 AND status = 'running'
 	`
 
-	result, err = m.db.Pool.Exec(ctx, query, result, taskID)
+	execResult, err := m.db.Pool.Exec(ctx, query, result, taskID)
 	if err != nil {
 		return fmt.Errorf("failed to complete task: %v", err)
 	}
 
-	if result.RowsAffected() == 0 {
+	if execResult.RowsAffected() == 0 {
 		return fmt.Errorf("task not found or not in running state: %s", id)
 	}
 
@@ -373,4 +373,11 @@ func (m *DatabaseManager) DeleteTask(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+// Helper function to convert pointer to string
+func getStringFromPtr(ptr *string) string {
+	if ptr == nil {
+		return ""
+	}
+	return *ptr
 }

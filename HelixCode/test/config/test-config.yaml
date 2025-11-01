@@ -1,14 +1,12 @@
-# Test Configuration for Helix CLI
+# Test configuration for Helix CLI
+database:
+  host: "test-db"
+  port: 5432
+  user: "helix_test"
+  password: "test_password"
+  dbname: "helix_test"
+  sslmode: "disable"
 
-global:
-  theme: "default"
-  auto_confirm: false
-  max_workers: 4
-  log_level: "debug"
-  data_dir: "/tmp/helix-test"
-  cache_dir: "/tmp/helix-test-cache"
-
-# Distributed worker configuration for testing
 workers:
   enabled: true
   pool:
@@ -24,40 +22,50 @@ workers:
       port: 22
       username: "root"
       key_path: "/root/.ssh/id_rsa"
-      capabilities: ["code-generation", "refactoring"]
+      capabilities: ["code-generation", "testing"]
       display_name: "Test Worker 2"
     test-worker-3:
       host: "test-worker-3"
       port: 22
       username: "root"
       key_path: "/root/.ssh/id_rsa"
-      capabilities: ["testing", "debugging"]
+      capabilities: ["testing"]
       display_name: "Test Worker 3"
-  auto_install: true
-  health_check_interval: 10
-  max_concurrent_tasks: 5
+  auto_install: false
+  health_check_interval: 30
+  max_concurrent_tasks: 10
   task_timeout: 300
 
-# LLM configuration for testing
 llm:
-  llamacpp:
-    enabled: false  # Disabled in test environment
-  ollama:
-    enabled: false  # Disabled in test environment
-  openai:
-    enabled: false  # Disabled in test environment
+  providers:
+    local:
+      enabled: true
+      model_path: "/app/models"
+    ollama:
+      enabled: false
+      base_url: "http://localhost:11434"
+    openai:
+      enabled: false
+      api_key: "${OPENAI_API_KEY}"
 
-# Database configuration for testing
-database:
-  host: "test-db"
-  port: 5432
-  user: "helix_test"
-  password: "test_password"
-  dbname: "helix_test"
-  ssl_mode: "disable"
+notifications:
+  enabled: false
+  channels:
+    email:
+      enabled: false
+      smtp_server: "smtp.example.com"
+      from: "helix@example.com"
 
-# Test-specific settings
-test:
-  environment: "docker"
-  timeout_multiplier: 2.0
-  cleanup_after_tests: true
+logging:
+  level: "debug"
+  format: "json"
+
+security:
+  encryption:
+    enabled: false
+  authentication:
+    methods: ["api_key"]
+
+server:
+  port: 8080
+  host: "0.0.0.0"

@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // TestDistributedWorkerManager tests the distributed worker manager
@@ -61,7 +63,7 @@ func TestDistributedWorkerManager(t *testing.T) {
 		t.Fatalf("Failed to submit task: %v", err)
 	}
 
-	if task.ID == "" {
+	if task.ID == uuid.Nil {
 		t.Error("Task ID should be set after submission")
 	}
 
@@ -227,17 +229,16 @@ func TestWorkerCapabilities(t *testing.T) {
 // TestTaskStatusTransitions tests task status transitions
 func TestTaskStatusTransitions(t *testing.T) {
 	task := &DistributedTask{
-		Type:        "status-test",
-		Status:      TaskStatusPending,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		Type:      "status-test",
+		Status:    TaskStatusPending,
+		CreatedAt: time.Now(),
 	}
 
 	// Test status transitions
 	initialStatus := task.Status
 
 	// Simulate task assignment
-	task.Status = TaskStatusAssigned
+	task.Status = TaskStatusRunning
 	if task.Status == initialStatus {
 		t.Error("Task status should change when assigned")
 	}

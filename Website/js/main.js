@@ -175,65 +175,7 @@ class NavigationManager {
 }
 
 // Particle System
-class ParticleSystem {
-    constructor() {
-        this.container = document.querySelector('.particles-container');
-        this.particles = [];
-        this.maxParticles = 50;
-        this.init();
-    }
 
-    init() {
-        this.createParticles();
-        this.animate();
-    }
-
-    createParticles() {
-        for (let i = 0; i < this.maxParticles; i++) {
-            this.createParticle();
-        }
-    }
-
-    createParticle() {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        // Random properties
-        const size = Math.random() * 4 + 1;
-        const left = Math.random() * 100;
-        const opacity = Math.random() * 0.5 + 0.1;
-        const duration = Math.random() * 20 + 10;
-        const delay = Math.random() * 20;
-        
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        particle.style.left = `${left}%`;
-        particle.style.opacity = opacity;
-        particle.style.animationDuration = `${duration}s`;
-        particle.style.animationDelay = `${delay}s`;
-        
-        // Random color based on theme
-        const colors = ['var(--primary-400)', 'var(--accent-1)', 'var(--accent-4)'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        particle.style.background = color;
-        
-        this.container.appendChild(particle);
-        this.particles.push(particle);
-
-        // Remove particle after animation and create new one
-        setTimeout(() => {
-            if (particle.parentElement) {
-                particle.remove();
-                this.particles = this.particles.filter(p => p !== particle);
-                this.createParticle();
-            }
-        }, (duration + delay) * 1000);
-    }
-
-    animate() {
-        // Animation is handled by CSS
-    }
-}
 
 // Animation Observer
 class AnimationObserver {
@@ -290,11 +232,22 @@ function scrollToSection(sectionId) {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Detect low-performance devices and enable lightweight mode
+    const isLowPerformanceDevice = 
+        navigator.hardwareConcurrency < 4 || 
+        !navigator.gpu ||
+        window.innerWidth < 768 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isLowPerformanceDevice) {
+        document.body.classList.add('low-performance-mode');
+        console.log('📱 Lightweight mode enabled for better performance');
+    }
+
     // Initialize managers
     window.themeManager = new ThemeManager();
     window.toastManager = new ToastManager();
     window.navigationManager = new NavigationManager();
-    window.particleSystem = new ParticleSystem();
     window.animationObserver = new AnimationObserver();
 
     // Add initial styles for animated elements

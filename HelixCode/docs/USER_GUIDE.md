@@ -1,431 +1,502 @@
-# HelixCode User Guide
+# 📖 HelixCode User Guide
 
-## 🎯 Introduction
+## 🚀 Getting Started
 
-Welcome to HelixCode! This guide will help you get started with the distributed AI development platform.
+### Installation
 
-### What is HelixCode?
-
-HelixCode is an enterprise-grade platform that enables:
-- **Distributed Task Execution**: Split large tasks across multiple workers
-- **Work Preservation**: Automatic checkpointing and recovery
-- **Intelligent Task Division**: Smart task splitting based on capabilities
-- **Cross-Platform Development**: Support for multiple development workflows
-
-## 🚀 Quick Start
-
-### 1. Installation
-
+#### Quick Installation
 ```bash
-# Download and build
-make build
+# Download and install HelixCode
+curl -fsSL https://helixcode.dev/install.sh | bash
 
-# Or use pre-built binaries
-# Download from releases page
+# Verify installation
+helixcode --version
 ```
 
-### 2. Configuration
+#### Docker Installation
+```bash
+# Run with Docker
+docker run -p 8080:8080 helixcode/server:latest
 
+# Or use Docker Compose
+curl -O https://raw.githubusercontent.com/helixcode/helixcode/main/docker-compose.yml
+docker-compose up -d
+```
+
+#### Manual Installation
+```bash
+# Clone repository
+git clone https://github.com/helixcode/helixcode.git
+cd helixcode
+
+# Build from source
+make build
+
+# Install globally
+sudo cp bin/helixcode /usr/local/bin/
+```
+
+### Initial Setup
+
+#### Configuration
 Create a configuration file at `~/.config/helixcode/config.yaml`:
-
 ```yaml
 server:
-  address: "0.0.0.0"
   port: 8080
+  host: "localhost"
 
 database:
   host: "localhost"
   port: 5432
   user: "helixcode"
+  password: "your_password"
   dbname: "helixcode"
 
-auth:
-  jwt_secret: "your-secret-key"
+workers:
+  enabled: true
+  auto_install: true
 ```
 
-### 3. Start the Server
+#### Environment Variables
+```bash
+export HELIX_DATABASE_PASSWORD="your_password"
+export HELIX_AUTH_JWT_SECRET="your_jwt_secret"
+export HELIX_SERVER_PORT="8080"
+```
+
+## 🎯 Core Concepts
+
+### Distributed Workers
+
+Workers are remote machines that execute tasks. They can be:
+- **Local Workers**: Same machine as the server
+- **Remote Workers**: SSH-accessible machines
+- **Cloud Workers**: Cloud instances (AWS, GCP, Azure)
+
+### Tasks
+
+Tasks are units of work that can be:
+- **Code Generation**: AI-assisted code writing
+- **Testing**: Automated test execution
+- **Building**: Compilation and build processes
+- **Refactoring**: Code improvement and optimization
+
+### Projects
+
+Projects organize related tasks and workers:
+- **Development Projects**: Software development workflows
+- **Research Projects**: AI research and experimentation
+- **Infrastructure Projects**: System administration tasks
+
+## 📋 Basic Usage
+
+### Starting the Server
 
 ```bash
-./bin/helixcode
+# Start the HelixCode server
+helixcode server start
+
+# Or with custom configuration
+helixcode server start --config /path/to/config.yaml
+
+# Run in background
+helixcode server start --daemon
 ```
 
-## 👤 User Management
+### Adding Workers
 
-### Registration
+#### Local Worker
+```bash
+# Add local worker
+helixcode workers add local --name "local-worker" --capabilities "code-generation,testing"
+```
+
+#### SSH Worker
+```bash
+# Add SSH worker
+helixcode workers add ssh \
+  --name "remote-worker" \
+  --host "192.168.1.100" \
+  --port 22 \
+  --username "ubuntu" \
+  --key-path "~/.ssh/id_rsa" \
+  --capabilities "llm-inference,code-generation"
+```
+
+#### Cloud Worker
+```bash
+# Add AWS EC2 worker
+helixcode workers add aws \
+  --name "aws-worker" \
+  --instance-id "i-1234567890abcdef0" \
+  --region "us-east-1" \
+  --capabilities "testing,performance"
+```
+
+### Managing Workers
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "your_username",
-    "email": "your@email.com",
-    "password": "your_password",
-    "display_name": "Your Name"
-  }'
+# List all workers
+helixcode workers list
+
+# Get worker details
+helixcode workers info worker-id
+
+# Remove worker
+helixcode workers remove worker-id
+
+# Check worker health
+helixcode workers health
 ```
 
-### Login
-
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "your_username",
-    "password": "your_password"
-  }'
-```
-
-Response includes authentication token:
-
-```json
-{
-  "token": "jwt_token_here",
-  "user": {
-    "id": "uuid",
-    "username": "your_username",
-    "email": "your@email.com"
-  }
-}
-```
-
-### Using Authentication
-
-Include the token in subsequent requests:
-
-```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8080/api/v1/users/me
-```
-
-## 🔧 Worker Management
-
-### Registering a Worker
-
-Workers are distributed nodes that execute tasks. To register a worker:
-
-```bash
-curl -X POST http://localhost:8080/api/v1/workers \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "hostname": "worker-1.local",
-    "display_name": "Development Worker",
-    "capabilities": ["code_generation", "testing"],
-    "resources": {
-      "cpu_count": 8,
-      "total_memory": 17179869184,
-      "total_disk": 107374182400
-    },
-    "ssh_config": {
-      "host": "worker-1.local",
-      "port": 22,
-      "username": "deploy"
-    }
-  }'
-```
-
-### Worker Heartbeat
-
-Workers should send regular heartbeats:
-
-```bash
-curl -X POST http://localhost:8080/api/v1/workers/<worker_id>/heartbeat \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "cpu_usage_percent": 45.2,
-    "memory_usage_percent": 67.8,
-    "disk_usage_percent": 23.1,
-    "current_tasks_count": 2
-  }'
-```
-
-### Monitoring Workers
-
-View all workers:
-
-```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8080/api/v1/workers
-```
-
-View worker metrics:
-
-```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8080/api/v1/workers/<worker_id>/metrics
-```
-
-## 📋 Task Management
+## 🛠️ Task Management
 
 ### Creating Tasks
 
-Tasks represent units of work that can be distributed across workers.
-
+#### Code Generation Task
 ```bash
-curl -X POST http://localhost:8080/api/v1/tasks \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task_type": "code_generation",
-    "task_data": {
-      "language": "go",
-      "description": "Create REST API endpoint",
-      "specifications": "..."
-    },
-    "priority": 5,
-    "criticality": "normal",
-    "estimated_duration": "1h"
-  }'
+# Generate code from prompt
+helixcode tasks create code-generation \
+  --prompt "Create a REST API in Go with authentication" \
+  --language "go" \
+  --framework "gin" \
+  --output-dir "./generated-api"
 ```
 
-### Task Types
-
-- **code_generation**: Generate code based on specifications
-- **code_analysis**: Analyze and review code
-- **testing**: Run tests and generate reports
-- **building**: Compile and build projects
-- **refactoring**: Refactor existing code
-- **debugging**: Debug and fix issues
-- **planning**: Create development plans
-
-### Task Assignment
-
-Tasks are automatically assigned to available workers. You can also manually assign:
-
+#### Testing Task
 ```bash
-curl -X POST http://localhost:8080/api/v1/tasks/<task_id>/assign \
-  -H "Authorization: Bearer <token>"
+# Run comprehensive tests
+helixcode tasks create testing \
+  --project-path "./my-project" \
+  --test-type "unit,integration,e2e" \
+  --coverage-threshold 80
 ```
 
-### Monitoring Task Progress
-
-View task status:
-
+#### Building Task
 ```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8080/api/v1/tasks/<task_id>
+# Build project
+helixcode tasks create building \
+  --project-path "./my-project" \
+  --build-type "release" \
+  --platforms "linux, windows, darwin"
 ```
 
-List all tasks:
+### Task Monitoring
 
 ```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8080/api/v1/tasks
+# List all tasks
+helixcode tasks list
+
+# Get task status
+helixcode tasks status task-id
+
+# View task logs
+helixcode tasks logs task-id
+
+# Cancel task
+helixcode tasks cancel task-id
+
+# Retry failed task
+helixcode tasks retry task-id
 ```
+
+## 🔧 Advanced Features
 
 ### Work Preservation
 
-HelixCode automatically creates checkpoints for long-running tasks. To manually create a checkpoint:
+HelixCode automatically preserves work during:
+- **Worker Failures**: Tasks automatically reassigned
+- **Network Issues**: Checkpoints saved periodically
+- **System Restarts**: State restored from checkpoints
+
+#### Checkpoint Management
+```bash
+# List checkpoints for a task
+helixcode tasks checkpoints task-id
+
+# Restore from checkpoint
+helixcode tasks restore task-id --checkpoint checkpoint-id
+
+# Manual checkpoint creation
+helixcode tasks checkpoint task-id
+```
+
+### Distributed Development
+
+#### Planning Mode
+```bash
+# Analyze project and create development plan
+helixcode workflow planning \
+  --project-path "./my-project" \
+  --requirements "high-performance,scalable,microservices"
+```
+
+#### Building Mode
+```bash
+# Distributed compilation
+helixcode workflow building \
+  --project-path "./my-project" \
+  --workers 5 \
+  --cache-enabled true
+```
+
+#### Testing Mode
+```bash
+# Parallel test execution
+helixcode workflow testing \
+  --project-path "./my-project" \
+  --test-suites "unit,integration,performance" \
+  --parallel-workers 3
+```
+
+#### Refactoring Mode
+```bash
+# AI-assisted refactoring
+helixcode workflow refactoring \
+  --project-path "./my-project" \
+  --targets "performance,readability,security" \
+  --safety-checks true
+```
+
+### MCP Integration
+
+#### Adding MCP Servers
+```bash
+# Add stdio MCP server
+helixcode mcp add developer \
+  --type "stdio" \
+  --command "mcp-developer-server" \
+  --args "--verbose"
+
+# Add HTTP MCP server
+helixcode mcp add memory \
+  --type "http" \
+  --url "https://memory-server.example.com/mcp" \
+  --headers "Authorization=Bearer ${TOKEN}"
+```
+
+#### Managing MCP Tools
+```bash
+# List available tools
+helixcode mcp tools
+
+# Execute tool
+helixcode mcp execute tool-name --parameters '{"param": "value"}'
+
+# Monitor tool usage
+helixcode mcp stats
+```
+
+## 🎨 Customization
+
+### Themes and Appearance
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/tasks/<task_id>/checkpoint \
-  -H "Authorization: Bearer <token>" \
+# List available themes
+helixcode themes list
+
+# Set theme
+helixcode themes set "dark"
+
+# Create custom theme
+helixcode themes create my-theme --colors '{"primary": "#C2E95B"}'
+```
+
+### Configuration Profiles
+
+```bash
+# Create development profile
+helixcode config profile create dev \
+  --workers 2 \
+  --llm-provider local \
+  --notifications disabled
+
+# Switch to production profile
+helixcode config profile use prod
+
+# List profiles
+helixcode config profile list
+```
+
+## 🔌 API Usage
+
+### REST API
+
+#### Authentication
+```bash
+# Get authentication token
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "password"}'
+```
+
+#### Task Management
+```bash
+# Create task via API
+curl -X POST http://localhost:8080/api/v1/tasks \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "checkpoint_name": "pre-processing",
-    "checkpoint_data": {
-      "processed_files": 15,
-      "current_state": "processing"
+    "type": "code-generation",
+    "payload": {
+      "prompt": "Create a REST API",
+      "language": "go"
     }
   }'
 ```
 
-## 🗂️ Project Management
-
-### Creating Projects
-
-Projects organize related tasks and sessions.
-
+#### Worker Management
 ```bash
-curl -X POST http://localhost:8080/api/v1/projects \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "E-commerce API",
-    "description": "REST API for e-commerce platform",
-    "workspace_path": "/projects/ecommerce-api",
-    "git_repository_url": "https://github.com/user/ecommerce-api"
-  }'
+# List workers via API
+curl -X GET http://localhost:8080/api/v1/workers \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### Development Sessions
+### WebSocket API
 
-Sessions represent focused development work within a project.
-
-```bash
-curl -X POST http://localhost:8080/api/v1/sessions \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "project_id": "project_uuid",
-    "name": "User Authentication",
-    "description": "Implement JWT authentication",
-    "session_type": "building"
-  }'
+#### Real-time Updates
+```javascript
+const ws = new WebSocket('ws://localhost:8080/ws');
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Task update:', data);
+};
 ```
 
-## 📊 System Monitoring
+## 🚀 Performance Optimization
 
-### Health Check
+### Worker Configuration
 
-```bash
-curl http://localhost:8080/health
+#### Optimize for Code Generation
+```yaml
+workers:
+  code-gen-worker:
+    capabilities: ["code-generation"]
+    resources:
+      cpu: 8
+      memory: 16GB
+      gpu: true
+    optimization:
+      batch_size: 10
+      cache_enabled: true
 ```
 
-### System Statistics
-
-```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8080/api/v1/system/stats
+#### Optimize for Testing
+```yaml
+workers:
+  test-worker:
+    capabilities: ["testing"]
+    resources:
+      cpu: 4
+      memory: 8GB
+    optimization:
+      parallel_tests: 8
+      test_timeout: 300
 ```
 
-### System Status
+### Task Optimization
 
+#### Batch Processing
 ```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8080/api/v1/system/status
+# Process multiple files in batch
+helixcode tasks create code-generation \
+  --batch "./src/**/*.go" \
+  --pattern "*_test.go" \
+  --workers 3
 ```
 
-## 🔄 Workflows
-
-### Development Workflow
-
-1. **Create Project**: Organize your work
-2. **Start Session**: Begin focused development
-3. **Create Tasks**: Break down work into manageable units
-4. **Monitor Progress**: Track task completion
-5. **Review Results**: Analyze completed work
-
-### Distributed Workflow
-
-1. **Register Workers**: Add computing resources
-2. **Create Distributed Tasks**: Tasks that can be split
-3. **Automatic Assignment**: HelixCode assigns tasks to workers
-4. **Progress Tracking**: Monitor distributed execution
-5. **Result Aggregation**: Combine results from multiple workers
-
-## 🛠️ Advanced Features
-
-### Task Dependencies
-
-Create tasks that depend on others:
-
+#### Caching Strategy
 ```bash
-curl -X POST http://localhost:8080/api/v1/tasks \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task_type": "testing",
-    "task_data": { ... },
-    "dependencies": ["task_uuid_1", "task_uuid_2"]
-  }'
+# Enable build caching
+helixcode config set build.cache.enabled true
+helixcode config set build.cache.ttl "24h"
+
+# Clear cache
+helixcode cache clear
 ```
 
-### Task Retry
+## 🔒 Security Best Practices
 
-Retry failed tasks:
+### Authentication
+- Use strong passwords and JWT secrets
+- Enable multi-factor authentication
+- Regularly rotate API keys
+- Use environment variables for secrets
 
-```bash
-curl -X POST http://localhost:8080/api/v1/tasks/<task_id>/retry \
-  -H "Authorization: Bearer <token>"
-```
+### Network Security
+- Use HTTPS in production
+- Configure firewall rules
+- Use VPN for remote workers
+- Monitor network traffic
 
-### Critical Tasks
+### Worker Security
+- Use SSH keys instead of passwords
+- Regularly update worker software
+- Monitor worker activity
+- Implement access controls
 
-Mark tasks as critical to ensure they complete:
-
-```bash
-curl -X PUT http://localhost:8080/api/v1/tasks/<task_id> \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "criticality": "critical"
-  }'
-```
-
-## 🔍 Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Authentication Failed**
-   - Check token expiration
-   - Verify username/password
-   - Ensure proper Authorization header
+#### Worker Connection Issues
+```bash
+# Test SSH connection
+helixcode workers test worker-id
 
-2. **Task Not Assigned**
-   - Check worker availability
-   - Verify worker capabilities
-   - Check task dependencies
+# Check worker logs
+helixcode workers logs worker-id
 
-3. **Worker Offline**
-   - Verify worker connectivity
-   - Check heartbeat frequency
-   - Review worker configuration
-
-### Logs and Debugging
-
-Enable debug logging in configuration:
-
-```yaml
-logging:
-  level: "debug"
-  format: "text"
-  output: "stdout"
+# Restart worker
+helixcode workers restart worker-id
 ```
 
-### Performance Optimization
+#### Task Failures
+```bash
+# Get detailed error information
+helixcode tasks debug task-id
 
-- Use appropriate task priorities
-- Distribute work across multiple workers
-- Monitor system resources
-- Use checkpoints for long-running tasks
+# View task execution history
+helixcode tasks history task-id
 
-## 📚 Best Practices
+# Reset task state
+helixcode tasks reset task-id
+```
 
-### Task Design
+#### Performance Issues
+```bash
+# Monitor system resources
+helixcode system stats
 
-- **Break Down Work**: Create small, focused tasks
-- **Define Dependencies**: Specify task relationships
-- **Set Realistic Estimates**: Provide accurate duration estimates
-- **Use Appropriate Criticality**: Mark critical tasks appropriately
+# Check worker load
+helixcode workers load
 
-### Worker Management
+# Optimize configuration
+helixcode config optimize
+```
 
-- **Regular Heartbeats**: Maintain worker connectivity
-- **Resource Monitoring**: Track worker resource usage
-- **Capability Matching**: Assign tasks to capable workers
-- **Load Balancing**: Distribute work evenly
+### Logs and Diagnostics
 
-### Project Organization
+```bash
+# View server logs
+helixcode server logs
 
-- **Clear Naming**: Use descriptive project and session names
-- **Proper Documentation**: Document project requirements
-- **Version Control**: Integrate with Git repositories
-- **Regular Updates**: Keep project information current
+# Get system diagnostics
+helixcode system diagnostics
 
-## 🔗 Integration
+# Generate debug report
+helixcode debug report
+```
 
-### API Clients
+## 📚 Additional Resources
 
-HelixCode provides a comprehensive REST API that can be integrated with:
-
-- **CI/CD Pipelines**: Automate development workflows
-- **Monitoring Tools**: Track system performance
-- **Development Environments**: Integrate with IDEs
-- **Custom Applications**: Build custom interfaces
-
-### Web Interface
-
-Access the web interface at `http://localhost:8080` for a visual management interface.
+- **Documentation**: https://docs.helixcode.dev
+- **Community Forum**: https://community.helixcode.dev
+- **GitHub Repository**: https://github.com/helixcode/helixcode
+- **API Reference**: https://api.helixcode.dev
 
 ---
 
-**Need Help?**
-
-- Check the documentation in `/docs`
-- Create issues for bugs and feature requests
-- Join community discussions
-- Contact support for assistance
-
-**Happy developing with HelixCode! 🚀**
+**User Guide Version**: 1.0.0  
+**Last Updated**: 2025-11-01  
+**Support**: support@helixcode.dev

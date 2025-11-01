@@ -14,7 +14,7 @@ import (
 type ReasoningRequest struct {
 	ID           uuid.UUID
 	Prompt       string
-	Tools        []Tool
+	Tools        []ReasoningTool
 	ReasoningType ReasoningType
 	MaxSteps     int
 	Temperature  float64
@@ -38,15 +38,15 @@ type ReasoningStep struct {
 	StepNumber int
 	Thought    string
 	Action     string
-	ToolCall   *ToolCall
+	ToolCall   *ReasoningToolCall
 	Result     interface{}
 	Confidence float64
 }
 
-// ToolCall represents a call to a tool during reasoning
-type ToolCall struct {
-	ToolName string
-	Arguments map[string]interface{}
+// ReasoningToolCall represents a call to a tool during reasoning
+type ReasoningToolCall struct {
+	ToolName  string                 `json:"tool_name"`
+	Arguments map[string]interface{} `json:"arguments"`
 }
 
 // ReasoningType defines different types of reasoning approaches
@@ -59,37 +59,37 @@ const (
 	ReasoningTypeProgressive      ReasoningType = "progressive"
 )
 
-// Tool represents a tool that can be used during reasoning
-type Tool struct {
-	Name        string
-	Description string
-	Parameters  map[string]interface{}
-	Handler     ToolHandler
+// ReasoningTool represents a tool that can be used during reasoning
+type ReasoningTool struct {
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Parameters  map[string]interface{} `json:"parameters"`
+	Handler     ReasoningToolHandler   `json:"-"`
 }
 
-// ToolHandler is the function signature for tool execution
-type ToolHandler func(ctx context.Context, args map[string]interface{}) (interface{}, error)
+// ReasoningToolHandler is the function signature for tool execution in reasoning
+type ReasoningToolHandler func(ctx context.Context, args map[string]interface{}) (interface{}, error)
 
 // ReasoningEngine handles advanced reasoning capabilities
 type ReasoningEngine struct {
-	provider    LLMProvider
-	tools       map[string]Tool
+	provider    Provider
+	tools       map[string]ReasoningTool
 	maxSteps    int
 	temperature float64
 }
 
 // NewReasoningEngine creates a new reasoning engine
-func NewReasoningEngine(provider LLMProvider) *ReasoningEngine {
+func NewReasoningEngine(provider Provider) *ReasoningEngine {
 	return &ReasoningEngine{
 		provider:    provider,
-		tools:       make(map[string]Tool),
+		tools:       make(map[string]ReasoningTool),
 		maxSteps:    10,
 		temperature: 0.7,
 	}
 }
 
 // RegisterTool registers a tool with the reasoning engine
-func (e *ReasoningEngine) RegisterTool(tool Tool) error {
+func (e *ReasoningEngine) RegisterTool(tool ReasoningTool) error {
 	if _, exists := e.tools[tool.Name]; exists {
 		return fmt.Errorf("tool %s already registered", tool.Name)
 	}
@@ -224,8 +224,9 @@ Next step:`, step, maxSteps, currentThought)
 }
 
 func (e *ReasoningEngine) generateThought(ctx context.Context, prompt string, temperature float64) (string, error) {
-	genReq := GenerationRequest{
-		Prompt:      prompt,
+	genReq := &LLMRequest{
+		Model:       "default",
+		Messages:    []Message{{Role: "user", Content: prompt}},
 		MaxTokens:   500,
 		Temperature: temperature,
 		Stream:      false,
@@ -236,7 +237,7 @@ func (e *ReasoningEngine) generateThought(ctx context.Context, prompt string, te
 		return "", err
 	}
 
-	return resp.Text, nil
+	return resp.Content, nil
 }
 
 func (e *ReasoningEngine) isFinalAnswer(thought string) bool {
@@ -250,11 +251,11 @@ func (e *ReasoningEngine) extractFinalAnswer(thought string) string {
 	return thought
 }
 
-func (e *ReasoningEngine) shouldUseTool(thought string) (*ToolCall, bool) {
+func (e *ReasoningEngine) shouldUseTool(thought string) (*ReasoningToolCall, bool) {
 	// Simple heuristic to detect tool usage
 	for toolName := range e.tools {
 		if strings.Contains(strings.ToLower(thought), strings.ToLower(toolName)) {
-			return &ToolCall{
+			return &ReasoningToolCall{
 				ToolName: toolName,
 				Arguments: make(map[string]interface{}),
 			}, true
@@ -263,7 +264,7 @@ func (e *ReasoningEngine) shouldUseTool(thought string) (*ToolCall, bool) {
 	return nil, false
 }
 
-func (e *ReasoningEngine) executeTool(ctx context.Context, toolCall *ToolCall) (interface{}, error) {
+func (e *ReasoningEngine) executeTool(ctx context.Context, toolCall *ReasoningToolCall) (interface{}, error) {
 	tool, exists := e.tools[toolCall.ToolName]
 	if !exists {
 		return nil, fmt.Errorf("tool not found: %s", toolCall.ToolName)

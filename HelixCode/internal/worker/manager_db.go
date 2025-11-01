@@ -99,7 +99,7 @@ func (m *DatabaseManager) GetWorker(ctx context.Context, id string) (*Worker, er
 		DisplayName:         displayName,
 		SSHConfig:           sshConfig,
 		Capabilities:        capabilities,
-		Resources:           Resources(resources),
+		Resources:           parseResources(resources),
 		Status:              WorkerStatus(status),
 		HealthStatus:        WorkerHealth(healthStatus),
 		LastHeartbeat:       lastHeartbeatTime,
@@ -190,7 +190,7 @@ func (m *DatabaseManager) ListWorkers(ctx context.Context) ([]*Worker, error) {
 			DisplayName:         displayName,
 			SSHConfig:           sshConfig,
 			Capabilities:        capabilities,
-			Resources:           Resources(resources),
+			Resources:           parseResources(resources),
 			Status:              WorkerStatus(status),
 			HealthStatus:        WorkerHealth(healthStatus),
 			LastHeartbeat:       lastHeartbeatTime,
@@ -221,7 +221,7 @@ func (m *DatabaseManager) RegisterWorker(ctx context.Context, hostname, displayN
 		DisplayName:         displayName,
 		SSHConfig:           sshConfig,
 		Capabilities:        capabilities,
-		Resources:           resources,
+		Resources:           parseResources(resources),
 		Status:              "active",
 		HealthStatus:        "healthy",
 		CurrentTasksCount:   0,
@@ -304,4 +304,39 @@ func (m *DatabaseManager) UpdateWorkerHeartbeat(ctx context.Context, id string, 
 	}
 
 	return nil
+}
+
+// Helper functions for parsing
+
+func getStringDB(m map[string]interface{}, key, defaultValue string) string {
+	if val, ok := m[key].(string); ok {
+		return val
+	}
+	return defaultValue
+}
+
+func getIntDB(m map[string]interface{}, key string, defaultValue int) int {
+	if val, ok := m[key].(float64); ok {
+		return int(val)
+	}
+	return defaultValue
+}
+
+func getInt64DB(m map[string]interface{}, key string, defaultValue int64) int64 {
+	if val, ok := m[key].(float64); ok {
+		return int64(val)
+	}
+	return defaultValue
+}
+
+// parseResources converts a map to Resources struct
+func parseResources(resources map[string]interface{}) Resources {
+	return Resources{
+		CPUCount:    getIntDB(resources, "cpu_count", 0),
+		TotalMemory: getInt64DB(resources, "total_memory", 0),
+		TotalDisk:   getInt64DB(resources, "total_disk", 0),
+		GPUCount:    getIntDB(resources, "gpu_count", 0),
+		GPUModel:    getStringDB(resources, "gpu_model", ""),
+		GPUMemory:   getInt64DB(resources, "gpu_memory", 0),
+	}
 }

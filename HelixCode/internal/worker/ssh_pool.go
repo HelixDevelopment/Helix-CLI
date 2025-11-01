@@ -25,7 +25,7 @@ type SSHWorker struct {
 	ID           uuid.UUID
 	Hostname     string
 	DisplayName  string
-	SSHConfig    *SSHConfig
+	SSHConfig    *SSHWorkerConfig
 	Capabilities []string
 	Resources    Resources
 	Status       WorkerStatus
@@ -36,8 +36,8 @@ type SSHWorker struct {
 	client       *ssh.Client
 }
 
-// SSHConfig represents SSH connection configuration
-type SSHConfig struct {
+// SSHWorkerConfig represents SSH connection configuration for worker pool
+type SSHWorkerConfig struct {
 	Host       string
 	Port       int
 	Username   string
@@ -210,7 +210,7 @@ type SSHWorkerStats struct {
 
 // Helper methods
 
-func (p *SSHWorkerPool) validateSSHConfig(config *SSHConfig) error {
+func (p *SSHWorkerPool) validateSSHConfig(config *SSHWorkerConfig) error {
 	if config.Host == "" {
 		return fmt.Errorf("host is required")
 	}
@@ -223,7 +223,7 @@ func (p *SSHWorkerPool) validateSSHConfig(config *SSHConfig) error {
 	return nil
 }
 
-func (p *SSHWorkerPool) testSSHConnection(config *SSHConfig) error {
+func (p *SSHWorkerPool) testSSHConnection(config *SSHWorkerConfig) error {
 	client, err := p.createSSHClient(config)
 	if err != nil {
 		return err
@@ -240,7 +240,7 @@ func (p *SSHWorkerPool) testSSHConnection(config *SSHConfig) error {
 	return session.Run("echo 'SSH connection test successful'")
 }
 
-func (p *SSHWorkerPool) createSSHClient(config *SSHConfig) (*ssh.Client, error) {
+func (p *SSHWorkerPool) createSSHClient(config *SSHWorkerConfig) (*ssh.Client, error) {
 	var authMethods []ssh.AuthMethod
 
 	// Add private key authentication

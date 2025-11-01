@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -12,16 +11,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/helixdev/helix-cli/internal/llm"
-	"github.com/helixdev/helix-cli/internal/notification"
-	"github.com/helixdev/helix-cli/internal/worker"
+	"dev.helix.code/internal/llm"
+	"dev.helix.code/internal/notification"
+	"dev.helix.code/internal/worker"
 )
 
 // CLI represents the command-line interface
 type CLI struct {
 	workerPool *worker.SSHWorkerPool
-	llmProvider llm.LLMProvider
+	llmProvider llm.Provider
 	notificationEngine *notification.NotificationEngine
 }
 
@@ -161,7 +159,7 @@ func (c *CLI) handleAddWorker(ctx context.Context, host, username, keyPath strin
 		return fmt.Errorf("username is required")
 	}
 	
-	sshConfig := &worker.SSHConfig{
+	sshConfig := &worker.SSHWorkerConfig{
 		Host:     host,
 		Port:     22,
 		Username: username,

@@ -99,9 +99,9 @@ func (s *Server) setupRoutes() {
 		workers := api.Group("/workers")
 		workers.Use(s.authMiddleware())
 		{
-			workers.GET("", s.notImplemented)
+			workers.GET("", s.listWorkers)
 			workers.POST("", s.notImplemented)
-			workers.GET("/:id", s.notImplemented)
+			workers.GET("/:id", s.getWorker)
 			workers.PUT("/:id", s.notImplemented)
 			workers.DELETE("/:id", s.notImplemented)
 			workers.POST("/:id/heartbeat", s.notImplemented)
@@ -112,11 +112,11 @@ func (s *Server) setupRoutes() {
 		tasks := api.Group("/tasks")
 		tasks.Use(s.authMiddleware())
 		{
-			tasks.GET("", s.notImplemented)
-			tasks.POST("", s.notImplemented)
-			tasks.GET("/:id", s.notImplemented)
-			tasks.PUT("/:id", s.notImplemented)
-			tasks.DELETE("/:id", s.notImplemented)
+			tasks.GET("", s.listTasks)
+			tasks.POST("", s.createTask)
+			tasks.GET("/:id", s.getTask)
+			tasks.PUT("/:id", s.updateTask)
+			tasks.DELETE("/:id", s.deleteTask)
 			tasks.POST("/:id/assign", s.notImplemented)
 			tasks.POST("/:id/start", s.notImplemented)
 			tasks.POST("/:id/complete", s.notImplemented)
@@ -130,12 +130,18 @@ func (s *Server) setupRoutes() {
 		projects := api.Group("/projects")
 		projects.Use(s.authMiddleware())
 		{
-			projects.GET("", s.notImplemented)
-			projects.POST("", s.notImplemented)
-			projects.GET("/:id", s.notImplemented)
-			projects.PUT("/:id", s.notImplemented)
-			projects.DELETE("/:id", s.notImplemented)
+			projects.GET("", s.listProjects)
+			projects.POST("", s.createProject)
+			projects.GET("/:id", s.getProject)
+			projects.PUT("/:id", s.updateProject)
+			projects.DELETE("/:id", s.deleteProject)
 			projects.GET("/:id/sessions", s.notImplemented)
+			
+			// Workflow routes
+			projects.POST("/:projectId/workflows/planning", s.executePlanningWorkflow)
+			projects.POST("/:projectId/workflows/building", s.executeBuildingWorkflow)
+			projects.POST("/:projectId/workflows/testing", s.executeTestingWorkflow)
+			projects.POST("/:projectId/workflows/refactoring", s.executeRefactoringWorkflow)
 		}
 
 		// Session routes
@@ -153,8 +159,8 @@ func (s *Server) setupRoutes() {
 		system := api.Group("/system")
 		system.Use(s.authMiddleware())
 		{
-			system.GET("/stats", s.notImplemented)
-			system.GET("/status", s.notImplemented)
+			system.GET("/stats", s.getSystemStats)
+			system.GET("/status", s.getSystemStatus)
 		}
 	}
 

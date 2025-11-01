@@ -23,7 +23,9 @@ type Step struct {
 	Description string      `json:"description"`
 	Type        StepType    `json:"type"`
 	Action      StepAction  `json:"action"`
+	Dependencies []string   `json:"dependencies"`
 	Status      StepStatus  `json:"status"`
+	Error       string      `json:"error,omitempty"`
 }
 
 // StepType represents the type of workflow step
@@ -56,6 +58,7 @@ const (
 	StepStatusRunning   StepStatus = "running"
 	StepStatusCompleted StepStatus = "completed"
 	StepStatusFailed    StepStatus = "failed"
+	StepStatusSkipped   StepStatus = "skipped"
 )
 
 // WorkflowStatus represents the overall workflow status

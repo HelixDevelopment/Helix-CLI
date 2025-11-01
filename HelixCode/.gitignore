@@ -1,0 +1,118 @@
+
+# Binaries and build artifacts
+bin/
+dist/
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binaries
+*.test
+
+# Output of the go coverage tool
+coverage.out
+coverage.html
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Configuration files with secrets
+config/config.yaml
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Cache directories
+.cache/
+node_modules/
+
+# Documentation build output
+docs/_build/
+docs/_site/
+
+# Generated assets (can be regenerated)
+assets/icons/
+assets/colors/
+assets/images/logo-ascii.txt
+
+# Development tools
+.goreleaser.yml
+.dockerignore
+Dockerfile*
+
+# Backup files
+*.bak
+*.backup
+
+# Certificate files
+*.pem
+*.crt
+*.key
+
+# Mobile build artifacts
+mobile/ios/build/
+mobile/android/build/
+
+# Web build artifacts
+web/frontend/dist/
+web/frontend/node_modules/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories (if using Go modules, comment out vendor/ above)
+# vendor/
+
+# End of https://www.toptal.com/developers/gitignore/api/go,vim,emacs,visualstudiocode

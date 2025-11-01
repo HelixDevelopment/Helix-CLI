@@ -1,0 +1,11 @@
+
+    ╔══════════════════════════════════╗
+    ║        HELIXCODE CLI             ║
+    ║    Distributed AI Development    ║
+    ║                                  ║
+    ║        🌀  Helix  🌀            ║
+    ║                                  ║
+    ║   Intelligent Task Division      ║
+    ║   Work Preservation System       ║
+    ║   Cross-Platform Architecture    ║
+    ╚══════════════════════════════════╝

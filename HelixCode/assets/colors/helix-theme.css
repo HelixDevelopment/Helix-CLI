@@ -1,0 +1,15 @@
+/* HelixCode Theme - Generated from Logo */
+:root {
+  --primary-color: #C2E95B;
+  --secondary-color: #C0E853;
+  --accent-color: #B8ECD7;
+  --text-color: #2D3047;
+  --background-color: #F5F5F5;
+  --border-color: #C2E95B80;
+  --hover-color: #C2E95B1a;
+}
+
+.helix-primary { color: #C2E95B; }
+.helix-secondary { color: #C0E853; }
+.helix-accent { color: #B8ECD7; }
+.helix-bg { background-color: #F5F5F5; }

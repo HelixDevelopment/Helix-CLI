@@ -1,0 +1,46 @@
+# HelixCode Server Configuration
+
+server:
+  address: "0.0.0.0"
+  port: 8080
+  read_timeout: 30
+  write_timeout: 30
+  idle_timeout: 60
+  shutdown_timeout: 30
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "helixcode"
+  password: "" # Set via HELIX_DATABASE_PASSWORD environment variable
+  dbname: "helixcode"
+  sslmode: "disable"
+
+auth:
+  jwt_secret: "" # Set via HELIX_AUTH_JWT_SECRET environment variable
+  token_expiry: 86400
+  session_expiry: 604800
+  bcrypt_cost: 12
+
+workers:
+  health_check_interval: 30
+  health_ttl: 120
+  max_concurrent_tasks: 10
+
+tasks:
+  max_retries: 3
+  checkpoint_interval: 300
+  cleanup_interval: 3600
+
+llm:
+  default_provider: "local"
+  providers:
+    local: "http://localhost:11434"
+    openai: "" # Set API key via environment variable
+  max_tokens: 4096
+  temperature: 0.7
+
+logging:
+  level: "info"
+  format: "text"
+  output: "stdout"

@@ -1,0 +1,10 @@
+/* HelixCode Default Theme */
+:root {
+  --primary-color: #2E86AB;
+  --secondary-color: #A23B72;
+  --accent-color: #F18F01;
+  --text-color: #2D3047;
+  --background-color: #F5F5F5;
+  --border-color: #2E86AB80;
+  --hover-color: #2E86AB1a;
+}
